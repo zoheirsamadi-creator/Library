@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grand Archive of Code</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: English (Cinzel, Playfair) & Persian (Lalezar, Vazirmatn) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lalezar&family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Color Palette */
+            --wood-deepest: #1a0f0a;
+            --wood-dark: #2c1a11;
+            --wood-medium: #3e2723;
+            --wood-light: #5c3a21;
+            --wood-highlight: #7a5035;
+            
+            --parchment-light: #fdf5e6;
+            --parchment: #f4e4bc;
+            --parchment-dark: #d5c4a1;
+            --parchment-edge: #bdae88;
+            
+            --gold: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --gold-dark: #997a00;
+            
+            --ink: #1f140d;
+            --ink-faded: #4a3b32;
+            
+            /* Book Colors */
+            --book-red: #5c1616;
+            --book-blue: #152b47;
+            --book-green: #1a4224;
+            --book-purple: #3a1c47;
+            --book-black: #111;
+            --book-rust: #8b4513;
+            --book-teal: #0f4c5c;
+            --book-crimson: #7a1f1f;
+        }
+
+        /* Base Body - Default EN */
+        body {
+            background-color: var(--wood-deepest);
+            color: var(--parchment);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            transition: all 0.3s ease;
+        }
+
+        /* Language Modes */
+        body.en-mode {
+            font-family: 'Playfair Display', serif;
+        }
+        body.en-mode .font-title {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.1em;
+        }
+        
+        body.fa-mode {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        body.fa-mode .font-title {
+            font-family: 'Lalezar', cursive;
+            letter-spacing: normal;
+        }
+        body.fa-mode .tracking-widest {
+            letter-spacing: normal !important;
+        }
+
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: 
+                radial-gradient(circle at 15% 30%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 70%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="%23000" fill-opacity="0.2"/><rect width="2" height="2" fill="%23fff" fill-opacity="0.03"/></svg>');
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ornate-border {
+            border: 2px solid var(--gold);
+            padding: 4px;
+            position: relative;
+        }
+        .ornate-border::before {
+            content: ''; position: absolute;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
+            border: 1px solid var(--gold-dark);
+            pointer-events: none;
+        }
+
+        nav {
+            background: linear-gradient(to bottom, var(--wood-deepest), var(--wood-dark));
+            border-bottom: 2px solid var(--gold);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.9);
+        }
+
+        .nav-link {
+            position: relative; color: var(--parchment); transition: color 0.3s;
+        }
+        .nav-link:hover { color: var(--gold); }
+        .nav-link::after {
+            content: ''; position: absolute;
+            width: 0; height: 1px; bottom: -4px; left: 50%;
+            background-color: var(--gold); transition: all 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; left: 0; }
+
+        .lang-toggle {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .lang-toggle:hover {
+            background: var(--gold);
+            color: var(--wood-deepest);
+        }
+
+        .hero-section {
+            min-height: 80vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; text-align: center;
+            padding: 120px 20px 60px 20px;
+            background: radial-gradient(circle at center, rgba(62, 39, 35, 0.4) 0%, var(--wood-deepest) 100%);
+            border-bottom: 5px solid var(--wood-medium);
+            box-shadow: inset 0 -20px 40px rgba(0,0,0,0.8);
+        }
+
+        .title-glow { text-shadow: 0 0 20px rgba(212, 175, 55, 0.3), 2px 4px 8px rgba(0,0,0,0.8); }
+
+        .candle-wrapper {
+            position: absolute; bottom: 30px;
+            display: flex; align-items: flex-end; gap: 10px;
+        }
+        body[dir="ltr"] .candle-left { left: 10%; }
+        body[dir="ltr"] .candle-right { right: 10%; }
+        body[dir="rtl"] .candle-left { right: 10%; }
+        body[dir="rtl"] .candle-right { left: 10%; }
+        
+        .candle {
+            width: 24px;
+            background: linear-gradient(to right, #e0d5c1, #fff, #bdae88);
+            border-radius: 3px 3px 0 0;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.5), 5px 5px 10px rgba(0,0,0,0.8);
+            position: relative; display: flex; justify-content: center;
+        }
+        .candle.tall { height: 120px; }
+        .candle.medium { height: 80px; }
+        .candle.short { height: 50px; }
+        
+        .flame {
+            width: 16px; height: 28px;
+            background: #ffcc00;
+            border-radius: 50% 50% 20% 20%;
+            position: absolute; top: -25px;
+            box-shadow: 0 0 20px 5px rgba(255, 150, 0, 0.6), 0 0 40px 15px rgba(255, 100, 0, 0.3);
+            animation: flicker 0.15s infinite alternate;
+            transform-origin: bottom center;
+        }
+
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+            50% { transform: scale(1.05) rotate(1deg); opacity: 1; box-shadow: 0 0 25px 8px rgba(255, 150, 0, 0.7); }
+            100% { transform: scale(0.95) rotate(2deg); opacity: 0.8; }
+        }
+
+        .desk-section {
+            background-color: var(--wood-medium);
+            background-image: 
+                linear-gradient(90deg, rgba(0,0,0,0.2) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.2) 100%),
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.1) 40px, rgba(0,0,0,0.1) 80px);
+            padding: 80px 20px; position: relative;
+            box-shadow: inset 0 20px 30px rgba(0,0,0,0.8), inset 0 -20px 30px rgba(0,0,0,0.8);
+            border-bottom: 4px solid var(--wood-deepest);
+        }
+
+        .search-parchment {
+            background: var(--parchment); border-radius: 2px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2), inset 0 0 30px var(--parchment-dark);
+            padding: 10px 20px; display: flex; align-items: center;
+            max-width: 600px; margin: 0 auto; position: relative;
+            transform: rotate(-1deg);
+        }
+
+        .search-input {
+            background: transparent; border: none; outline: none;
+            font-size: 1.5rem; color: var(--ink);
+            width: 100%; font-style: italic;
+        }
+
+        .hall-section {
+            padding: 80px 20px;
+            background: var(--wood-deepest); min-height: 100vh;
+        }
+
+        .bookshelf {
+            max-width: 1200px; margin: 0 auto 100px auto;
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end;
+            gap: 15px; padding: 0 40px 20px 40px; position: relative; min-height: 280px;
+        }
+
+        .shelf-board {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 30px;
+            background: linear-gradient(to bottom, var(--wood-light), var(--wood-medium), var(--wood-dark));
+            border-top: 2px solid var(--wood-highlight); border-radius: 4px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.9), inset 0 -2px 10px rgba(0,0,0,0.8); z-index: 1;
+        }
+
+        .book-spine {
+            width: 75px; height: 280px; border-radius: 6px 3px 3px 6px;
+            position: relative; cursor: pointer; z-index: 2;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 15px 0; transform-origin: bottom center;
+            box-shadow: inset -6px 0 15px rgba(0,0,0,0.6), inset 4px 0 6px rgba(255,255,255,0.15), -8px 5px 15px rgba(0,0,0,0.7);
+        }
+
+        .book-spine:hover {
+            transform: translateY(-30px) scale(1.05) rotate(0deg) !important;
+            box-shadow: 0 0 30px var(--gold-glow), inset -4px 0 10px rgba(0,0,0,0.4); z-index: 20;
+        }
+
+        .book-title {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 3px #000;
+            flex-grow: 1; display: flex; align-items: center;
+        }
+
+        .scrolls-section {
+            padding: 100px 20px; background: var(--wood-medium);
+            box-shadow: inset 0 20px 40px rgba(0,0,0,0.8), inset 0 -20px 40px rgba(0,0,0,0.8);
+            border-top: 5px solid var(--wood-dark); border-bottom: 5px solid var(--wood-dark);
+        }
+
+        .scroll-card {
+            background: var(--parchment); padding: 30px; position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 0 40px var(--parchment-dark);
+            color: var(--ink); text-align: center; transition: transform 0.3s ease; cursor: pointer;
+        }
+        .scroll-card:hover { transform: translateY(-10px); }
+
+        #reading-room {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 100;
+            justify-content: center; align-items: center; perspective: 2000px;
+        }
+
+        .open-book {
+            display: flex; flex-direction: column; width: 95vw; max-width: 1200px;
+            height: 90vh; max-height: 850px; background: var(--wood-deepest); padding: 15px;
+            border-radius: 10px; box-shadow: 0 30px 60px rgba(0,0,0,1), inset 0 0 20px rgba(0,0,0,0.8);
+            transform: rotateX(45deg) scale(0.8); opacity: 0; transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #reading-room.active .open-book { transform: rotateX(0deg) scale(1); opacity: 1; }
+
+        .pages-wrapper {
+            display: flex; flex-direction: column; flex: 1;
+            background: var(--parchment); border-radius: 5px;
+            box-shadow: inset 0 0 50px var(--parchment-dark); overflow: hidden; position: relative;
+        }
+        @media (min-width: 800px) { .pages-wrapper { flex-direction: row; } }
+
+        .page { flex: 1; padding: 40px; color: var(--ink); overflow-y: auto; position: relative; }
+
+        .term-item {
+            cursor: pointer; padding: 15px; border-bottom: 1px dashed var(--parchment-edge);
+            transition: all 0.2s ease; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;
+        }
+        .term-item:hover, .term-item.active {
+            color: var(--book-red); background: rgba(0,0,0,0.03); font-weight: bold;
+        }
+        
+        body[dir="ltr"] .term-item:hover { padding-left: 25px; }
+        body[dir="rtl"] .term-item:hover { padding-right: 25px; }
+
+        .dust-mote {
+            position: fixed; background: rgba(212, 175, 55, 0.4); border-radius: 50%;
+            pointer-events: none; z-index: 99; animation: drift linear infinite;
+        }
+        @keyframes drift {
+            0% { transform: translateY(110vh) translateX(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; } 80% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(100px) scale(1.5); opacity: 0; }
+        }
+        
+        .code-block {
+            background: #1e130c; color: #dcd0b6; padding: 20px; border-radius: 4px;
+            border: 1px solid #3c2a1e; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; direction: ltr; text-align: left;
+        }
+        .code-keyword { color: #c678dd; } .code-string { color: #98c379; } .code-function { color: #61afef; }
+    </style>
+</head>
+<body class="en-mode">
+
+    <div class="ambient-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full top-0 z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <span class="text-3xl text-[--gold]">🏰</span>
+                    <span class="text-xl md:text-2xl font-bold text-[--gold] font-title tracking-widest uppercase" data-i18n="nav_title">The Grand Archive</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="hidden md:flex items-baseline space-x-8 font-title text-sm tracking-wider" style="gap: 1.5rem">
+                        <a href="#desk" class="nav-link px-3 py-2" data-i18n="nav_desk">The Desk</a>
+                        <a href="#hall" class="nav-link px-3 py-2" data-i18n="nav_hall">Grand Hall</a>
+                        <a href="#scrolls" class="nav-link px-3 py-2" data-i18n="nav_scrolls">Ancient Scrolls</a>
+                    </div>
+                    <!-- Language Toggle -->
+                    <button class="lang-toggle font-title" onclick="toggleLanguage()" id="langBtn">فارسی</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section z-10 mt-20">
+        <div class="ornate-border p-8 md:p-16 max-w-4xl mx-auto bg-black bg-opacity-40 backdrop-blur-sm">
+            <h1 class="text-5xl md:text-7xl font-title text-[--gold] mb-6 title-glow uppercase tracking-widest leading-tight" data-i18n="hero_title">
+                The Grand Archive<br><span class="text-3xl md:text-5xl">of Code</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 leading-relaxed font-light italic opacity-90 max-w-2xl mx-auto" data-i18n="hero_desc">
+                "Here lie the foundation stones of the digital realm. Traverse the shelves, unroll the scrolls, and imbibe the syntax of the ancients."
+            </p>
+        </div>
+
+        <div class="candle-wrapper candle-left hidden md:flex">
+            <div class="candle tall"><div class="flame"></div></div>
+            <div class="candle short"><div class="flame" style="animation-delay: 0.1s"></div></div>
+        </div>
+        <div class="candle-wrapper candle-right hidden md:flex">
+            <div class="candle medium"><div class="flame" style="animation-delay: 0.2s"></div></div>
+            <div class="candle tall"><div class="flame" style="animation-delay: 0.05s"></div></div>
+        </div>
+    </header>
+
+    <section id="desk" class="desk-section z-10">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-title text-[--gold] mb-4 tracking-wider" data-i18n="desk_title">The Archivist's Desk</h2>
+            <p class="text-[--parchment] mb-10 italic text-lg" data-i18n="desk_desc">Speak the name of the tome you seek, and the shelves shall reveal it.</p>
+            
+            <div class="search-parchment">
+                <span class="text-3xl mx-2 opacity-70">🪶</span>
+                <input type="text" id="searchInput" class="search-input" data-i18n-placeholder="desk_placeholder" placeholder="Inscribe language name here...">
+            </div>
+        </div>
+    </section>
+
+    <section id="hall" class="hall-section z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-title text-[--gold] mb-4 tracking-widest title-glow" data-i18n="hall_title">Grand Hall of Languages</h2>
+            <div class="w-24 h-1 bg-[--gold] mx-auto opacity-50"></div>
+        </div>
+
+        <div class="bookshelf" id="shelf-1"></div>
+        <div class="bookshelf mt-20" id="shelf-2"></div>
+    </section>
+
+    <section id="scrolls" class="scrolls-section z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-title text-[--wood-deepest] mb-4 tracking-widest font-bold" data-i18n="scrolls_title">Ancient Scrolls of Theory</h2>
+            <p class="text-xl text-[--wood-dark] italic max-w-2xl mx-auto" data-i18n="scrolls_desc">Foundational dogmas that transcend the syntax of individual tongues.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto" id="scroll-container">
+            <!-- Scrolls injected here -->
+        </div>
+    </section>
+
+    <footer class="bg-[--wood-deepest] pt-20 pb-10 border-t-4 border-[--gold] z-10 relative">
+        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-start">
+            <div>
+                <h3 class="text-2xl font-title text-[--gold] mb-4" data-i18n="footer_title">The Archive</h3>
+                <p class="text-[--parchment-dark] leading-relaxed italic" data-i18n="footer_desc">Preserving the sacred syntax and semantics of the modern era for future generations of coders, engineers, and digital scribes.</p>
+            </div>
+            <div class="text-center flex flex-col items-center">
+                <div class="text-4xl text-[--book-red] mb-4 drop-shadow-lg">🎴</div>
+                <p class="font-title tracking-widest text-[--parchment] uppercase" data-i18n="footer_motto">Knowledge is Power</p>
+                <p class="text-sm mt-2 text-gray-500" data-i18n="footer_est">Established MMXXIV</p>
+            </div>
+            <div class="md:text-end">
+                <h3 class="text-2xl font-title text-[--gold] mb-4" data-i18n="footer_halls">Halls</h3>
+                <ul class="space-y-2 text-[--parchment-dark]">
+                    <li><a href="#desk" class="hover:text-[--gold] transition" data-i18n="nav_desk">The Desk</a></li>
+                    <li><a href="#hall" class="hover:text-[--gold] transition" data-i18n="nav_hall">Grand Hall</a></li>
+                    <li><a href="#scrolls" class="hover:text-[--gold] transition" data-i18n="nav_scrolls">Ancient Scrolls</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <div id="reading-room">
+        <div class="open-book relative">
+            <button class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 bg-[--parchment-dark] border-2 border-[--wood-dark] rounded-full text-2xl font-title flex items-center justify-center cursor-pointer hover:bg-[--book-red] hover:text-white transition z-50 shadow-lg" onclick="closeReadingRoom()">X</button>
+            
+            <div class="pages-wrapper">
+                <!-- Left Page -->
+                <div class="page border-b md:border-b-0 md:border-e border-[--parchment-edge]">
+                    <div class="text-center mb-10 border-b-2 border-dashed border-[--parchment-dark] pb-6">
+                        <span class="text-5xl block mb-4 opacity-80" id="modal-icon">📚</span>
+                        <h2 id="modal-title" class="text-4xl font-title font-bold text-[--book-red] tracking-wider uppercase">Title</h2>
+                        <p id="modal-subtitle" class="font-title text-lg mt-2 text-[--ink] opacity-70 tracking-widest"></p>
+                    </div>
+                    
+                    <h3 class="text-2xl italic font-bold mb-6 text-center text-[--ink]" data-i18n="modal_index">~ Index of Concepts ~</h3>
+                    <ul id="modal-index" class="space-y-2"></ul>
+                </div>
+
+                <!-- Right Page -->
+                <div class="page flex flex-col relative shadow-[inset_30px_0_40px_-20px_rgba(0,0,0,0.2)]">
+                    <div id="modal-content" class="flex-grow flex flex-col justify-center items-center text-center">
+                        <div class="text-[--parchment-dark] text-7xl mb-8 transform transition duration-1000 hover:scale-110">🕯️</div>
+                        <p class="text-2xl text-[--ink] italic opacity-80 leading-relaxed max-w-md mx-auto" data-i18n="modal_empty">
+                            The pages are blank.<br><br>Select a concept from the index to reveal the ink of the ancients.
+                        </p>
+                    </div>
+                    
+                    <div class="mt-10 pt-6 text-center text-sm text-[--parchment-dark] italic border-t border-[--parchment-edge] font-title uppercase" data-i18n="modal_property">
+                        Property of the Grand Archive
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Translation Dictionary ---
+        const translations = {
+            en: {
+                toggle_btn: "فارسی",
+                nav_title: "The Grand Archive",
+                nav_desk: "The Desk",
+                nav_hall: "Grand Hall",
+                nav_scrolls: "Ancient Scrolls",
+                hero_title: "The Grand Archive<br><span class='text-3xl md:text-5xl'>of Code</span>",
+                hero_desc: "\"Here lie the foundation stones of the digital realm. Traverse the shelves, unroll the scrolls, and imbibe the syntax of the ancients.\"",
+                desk_title: "The Archivist's Desk",
+                desk_desc: "Speak the name of the tome you seek, and the shelves shall reveal it.",
+                desk_placeholder: "Inscribe language name here...",
+                hall_title: "Grand Hall of Languages",
+                scrolls_title: "Ancient Scrolls of Theory",
+                scrolls_desc: "Foundational dogmas that transcend the syntax of individual tongues.",
+                footer_title: "The Archive",
+                footer_desc: "Preserving the sacred syntax and semantics of the modern era for future generations of coders, engineers, and digital scribes.",
+                footer_motto: "Knowledge is Power",
+                footer_est: "Established MMXXIV",
+                footer_halls: "Halls",
+                modal_index: "~ Index of Concepts ~",
+                modal_empty: "The pages are blank.<br><br>Select a concept from the index to reveal the ink of the ancients.",
+                modal_property: "Property of the Grand Archive",
+                code_label: "Incantation (Code)"
+            },
+            fa: {
+                toggle_btn: "English",
+                nav_title: "بایگانی اعظم",
+                nav_desk: "میز جستجو",
+                nav_hall: "تالار بزرگ",
+                nav_scrolls: "طومارهای باستانی",
+                hero_title: "بایگانی اعظم<br><span class='text-3xl md:text-5xl'>کـد و برنامه‌نویسی</span>",
+                hero_desc: "\"اینجا سنگ‌بنای قلمرو دیجیتال نهفته است. در قفسه‌ها قدم بزن، طومارها را بگشا و جادوی گذشتگان را فراگیر.\"",
+                desk_title: "میز کتابدار",
+                desk_desc: "نام کتابی که می‌جویی را بر زبان بیاور، تا قفسه‌ها آن را بر تو نمایان کنند.",
+                desk_placeholder: "نام زبان را اینجا حک کن...",
+                hall_title: "تالار بزرگ زبان‌ها",
+                scrolls_title: "طومارهای باستانی تئوری",
+                scrolls_desc: "اصول و عقاید بنیادین که فراتر از قوانین زبان‌های فردی هستند.",
+                footer_title: "بایگانی",
+                footer_desc: "حفظ و نگهداری از مفاهیم و قواعد مقدس عصر مدرن برای نسل‌های آینده برنامه‌نویسان، مهندسان و کاتبان دیجیتال.",
+                footer_motto: "دانش قدرت است",
+                footer_est: "تاسیس ۲۰۲۴",
+                footer_halls: "تالارها",
+                modal_index: "~ فهرست مفاهیم ~",
+                modal_empty: "صفحات خالی هستند.<br><br>مفهومی را از فهرست انتخاب کن تا جوهر گذشتگان نمایان شود.",
+                modal_property: "متعلق به بایگانی اعظم",
+                code_label: "ورد جادویی (کد)"
+            }
+        };
+
+        // --- Library Data (Bilingual) ---
+        const libraryData = [
+            {
+                id: 'python', shelf: 1, icon: '🐍', color: 'var(--book-blue)', textColor: 'var(--gold)',
+                en: { title: 'Python', subtitle: 'The Serpent' },
+                fa: { title: 'پایتون', subtitle: 'مار بزرگ' },
+                terms: [
+                    { 
+                        en: { name: 'List Comprehension', def: 'An elegant incantation for transmuting one list into another.' },
+                        fa: { name: 'درک لیست', def: 'وردی ظریف برای تبدیل و فیلتر کردن یک لیست به لیست دیگر در یک نفس.' },
+                        code: '<span class="code-keyword">squares</span> = [x**<span class="code-string">2</span> <span class="code-keyword">for</span> x <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-string">10</span>)]' 
+                    },
+                    { 
+                        en: { name: 'Decorator', def: 'A mystical wrapper that alters the behavior of a function without changing its true form.' },
+                        fa: { name: 'دکوراتور', def: 'پوششی عرفانی که رفتار یک تابع را بدون تغییر شکل واقعی آن دگرگون می‌کند.' },
+                        code: '<span class="code-keyword">@time_spell</span>\n<span class="code-keyword">def</span> <span class="code-function">cast_fireball</span>():\n    <span class="code-keyword">pass</span>' 
+                    }
+                ]
+            },
+            {
+                id: 'javascript', shelf: 1, icon: '⚡', color: 'var(--gold)', textColor: 'var(--wood-deepest)',
+                en: { title: 'JavaScript', subtitle: 'Web\'s Pulse' },
+                fa: { title: 'جاوا اسکریپت', subtitle: 'نبض وب' },
+                terms: [
+                    { 
+                        en: { name: 'Closure', def: 'A phenomenon where an inner spell retains access to variables of its outer realm.' },
+                        fa: { name: 'کلوژر (بستار)', def: 'پدیده‌ای که در آن یک طلسم درونی، حتی پس از نابودی قلمرو بیرونی، به انرژی‌های آن دسترسی دارد.' },
+                        code: '<span class="code-keyword">function</span> <span class="code-function">createMage</span>() {\n  <span class="code-keyword">let</span> mana = <span class="code-string">100</span>;\n  <span class="code-keyword">return</span> <span class="code-keyword">function</span>() { mana--; }\n}' 
+                    },
+                    { 
+                        en: { name: 'Promise', def: 'A vow made by the code to complete a task in the future. It may be fulfilled, or broken.' },
+                        fa: { name: 'پرامیس (وعده)', def: 'پیمانی که کد می‌بندد تا در آینده کاری را تمام کند. این پیمان ممکن است برآورده یا شکسته شود.' },
+                        code: '<span class="code-function">fetch</span>(<span class="code-string">"scroll.txt"</span>).<span class="code-function">then</span>(res => res.<span class="code-function">text</span>());' 
+                    }
+                ]
+            },
+            {
+                id: 'cpp', shelf: 1, icon: '⚙️', color: 'var(--book-black)', textColor: 'var(--gold)',
+                en: { title: 'C++', subtitle: 'The Engine' },
+                fa: { title: 'سی پلاس پلاس', subtitle: 'موتور قدرتمند' },
+                terms: [
+                    { 
+                        en: { name: 'Pointers', def: 'Dangerous artifacts holding the physical address of data in the computer\'s memory realm.' },
+                        fa: { name: 'اشاره‌گرها', def: 'ابزارهای خطرناکی که آدرس فیزیکی دقیق داده‌ها را در قلمرو حافظه کامپیوتر نگه می‌دارند.' },
+                        code: '<span class="code-keyword">int</span> mana = <span class="code-string">100</span>;\n<span class="code-keyword">int</span>* pMana = &amp;mana;' 
+                    }
+                ]
+            },
+            {
+                id: 'java', shelf: 2, icon: '☕', color: 'var(--book-crimson)', textColor: 'var(--gold)',
+                en: { title: 'Java', subtitle: 'The Machine' },
+                fa: { title: 'جاوا', subtitle: 'ماشین ابدی' },
+                terms: [
+                    { 
+                        en: { name: 'JVM', def: 'A mythical ethereal engine allowing compiled byte-code to run on any mortal hardware.' },
+                        fa: { name: 'ماشین مجازی جاوا', def: 'یک موتور اثیری افسانه‌ای که اجازه می‌دهد کدهای کامپایل شده روی هر سخت‌افزار فانی اجرا شوند.' }
+                    },
+                    { 
+                        en: { name: 'Polymorphism', def: 'The ability of different objects to respond to the same command in their own unique ways.' },
+                        fa: { name: 'چندریختی', def: 'توانایی اشیاء مختلف برای پاسخگویی به یک فرمان واحد به روش‌های منحصر به فرد خود.' },
+                        code: '<span class="code-keyword">Animal</span> beast = <span class="code-keyword">new</span> <span class="code-function">Dragon</span>();\nbeast.<span class="code-function">speak</span>();' 
+                    }
+                ]
+            },
+            {
+                id: 'rust', shelf: 2, icon: '🦀', color: 'var(--book-rust)', textColor: 'var(--parchment)',
+                en: { title: 'Rust', subtitle: 'Iron Clad' },
+                fa: { title: 'راست', subtitle: 'زره آهنین' },
+                terms: [
+                    { 
+                        en: { name: 'Borrow Checker', def: 'A strict inquisitor ensuring memory safety without a garbage collector.' },
+                        fa: { name: 'بازرس امانت‌گیری', def: 'بازرسی سخت‌گیر که ایمنی حافظه را بدون نیاز به زباله‌روب تضمین می‌کند.' },
+                        code: '<span class="code-keyword">let</span> <span class="code-keyword">mut</span> sword = <span class="code-function">String::from</span>(<span class="code-string">"Iron"</span>);\n<span class="code-keyword">let</span> r1 = &amp;<span class="code-keyword">mut</span> sword;' 
+                    }
+                ]
+            }
+        ];
+
+        const scrollData = [
+            { 
+                en: { title: "Design Patterns", desc: "Timeless architectural blueprints for object-oriented realms." },
+                fa: { title: "الگوهای طراحی", desc: "نقشه‌های معماری بی‌زمان برای قلمروهای شی‌گرا." }
+            },
+            { 
+                en: { title: "Big O Notation", desc: "The mathematical lore used to measure the efficiency of algorithms." },
+                fa: { title: "نماد O بزرگ", desc: "دانش ریاضی که برای اندازه‌گیری کارایی و سرعت الگوریتم‌ها استفاده می‌شود." }
+            },
+            { 
+                en: { title: "Data Structures", desc: "The sacred geometries used to organize and store knowledge in memory." },
+                fa: { title: "ساختمان داده‌ها", desc: "هندسه‌های مقدسی که برای سازماندهی و ذخیره دانش در حافظه استفاده می‌شوند." }
+            }
+        ];
+
+        let currentLang = 'en';
+
+        // DOM Elements
+        const shelf1 = document.getElementById('shelf-1');
+        const shelf2 = document.getElementById('shelf-2');
+        const scrollContainer = document.getElementById('scroll-container');
+        const searchInput = document.getElementById('searchInput');
+        const modal = document.getElementById('reading-room');
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'fa' : 'en';
+            
+            // Update Body Classes & Direction
+            document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+            document.body.className = currentLang === 'en' ? 'en-mode' : 'fa-mode';
+            
+            // Update Toggle Button Text
+            document.getElementById('langBtn').textContent = translations[currentLang].toggle_btn;
+
+            // Update Static Text
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = translations[currentLang][key];
+                }
+            });
+
+            // Update Placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+
+            // Re-render Dynamic Content
+            renderBooks(searchInput.value);
+            renderScrolls();
+            
+            // Close modal if open to prevent mixing languages improperly
+            if (modal.classList.contains('active')) {
+                closeReadingRoom();
+            }
+        }
+
+        function renderBooks(filter = '') {
+            shelf1.innerHTML = '<div class="shelf-board"></div>';
+            shelf2.innerHTML = '<div class="shelf-board"></div>';
+
+            libraryData.forEach(book => {
+                const langData = book[currentLang];
+                if (filter && !langData.title.toLowerCase().includes(filter.toLowerCase())) return;
+
+                const bookEl = document.createElement('div');
+                bookEl.className = `book-spine transition-transform`;
+                bookEl.style.backgroundColor = book.color;
+                
+                // Adjust rotation/tilt visually
+                const tilt = Math.random() > 0.5 ? (Math.random() > 0.5 ? 'rotate(-3deg)' : 'rotate(3deg)') : 'rotate(0deg)';
+                bookEl.style.transform = tilt;
+                
+                bookEl.innerHTML = `
+                    <div style="width: 100%; height: 4px; background: rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"></div>
+                    <div class="text-3xl mt-4 mb-2 drop-shadow-md">${book.icon}</div>
+                    <div class="book-title font-title font-bold text-center" style="color: ${book.textColor}">
+                        ${langData.title}
+                    </div>
+                    <div style="width: 100%; height: 4px; background: rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"></div>
+                `;
+
+                bookEl.onclick = () => openReadingRoom(book);
+
+                if (book.shelf === 1) shelf1.appendChild(bookEl);
+                else shelf2.appendChild(bookEl);
+            });
+        }
+
+        function renderScrolls() {
+            scrollContainer.innerHTML = '';
+            scrollData.forEach(scroll => {
+                const langData = scroll[currentLang];
+                const el = document.createElement('div');
+                el.className = 'scroll-card border border-[--parchment-edge] rounded';
+                el.innerHTML = `
+                    <h3 class="text-2xl font-title font-bold text-[--book-red] mb-3 border-b border-[--parchment-edge] pb-2">${langData.title}</h3>
+                    <p class="italic text-[--ink] opacity-90 leading-relaxed">${langData.desc}</p>
+                `;
+                scrollContainer.appendChild(el);
+            });
+        }
+
+        let activeIndexItem = null;
+
+        function openReadingRoom(book) {
+            const langData = book[currentLang];
+            
+            document.getElementById('modal-title').textContent = langData.title;
+            document.getElementById('modal-title').style.color = book.id === 'javascript' ? 'var(--wood-deepest)' : book.color;
+            document.getElementById('modal-subtitle').textContent = `~ ${langData.subtitle} ~`;
+            document.getElementById('modal-icon').textContent = book.icon;
+            
+            const modalIndex = document.getElementById('modal-index');
+            const modalContent = document.getElementById('modal-content');
+            
+            modalIndex.innerHTML = '';
+            modalContent.innerHTML = `
+                <div class="text-[--parchment-dark] text-7xl mb-8">🕯️</div>
+                <p class="text-2xl text-[--ink] italic opacity-80 leading-relaxed max-w-md mx-auto">
+                    ${translations[currentLang].modal_empty}
+                </p>
+            `;
+            activeIndexItem = null;
+
+            book.terms.forEach((term) => {
+                const termLangData = term[currentLang];
+                const li = document.createElement('li');
+                li.className = 'term-item font-title font-bold text-[--ink]';
+                li.textContent = termLangData.name;
+                li.onclick = () => showTermContent(term, termLangData, li);
+                modalIndex.appendChild(li);
+            });
+
+            modal.style.display = 'flex';
+            void modal.offsetWidth;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function showTermContent(fullTerm, termLangData, element) {
+            if (activeIndexItem) activeIndexItem.classList.remove('active');
+            element.classList.add('active');
+            activeIndexItem = element;
+
+            let html = `
+                <div class="w-full h-full flex flex-col px-4 text-start">
+                    <h4 class="text-4xl font-title font-bold mb-8 text-[--book-red] border-b-2 border-double border-[--parchment-dark] pb-4 flex items-center gap-4">
+                        <span class="text-3xl opacity-70">✒️</span> ${termLangData.name}
+                    </h4>
+                    
+                    <p class="text-2xl leading-loose text-[--ink] mb-10">
+                        <span class="text-6xl float-${currentLang==='en'?'left':'right'} mx-3 font-title text-[--gold-dark] leading-none mt-2">${termLangData.def.charAt(0)}</span>
+                        ${termLangData.def.substring(1)}
+                    </p>
+            `;
+            
+            if (fullTerm.code) {
+                const codeLabelPos = currentLang === 'en' ? 'left-4' : 'right-4';
+                html += `
+                    <div class="mt-auto relative group" dir="ltr">
+                        <div class="absolute -top-3 ${codeLabelPos} bg-[--parchment] px-2 text-sm font-title font-bold text-[--ink-faded] z-10">
+                            ${translations[currentLang].code_label}
+                        </div>
+                        <div class="code-block shadow-2xl text-lg md:text-xl font-mono">
+                            ${fullTerm.code}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            document.getElementById('modal-content').innerHTML = html;
+        }
+
+        function closeReadingRoom() {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }, 600);
+        }
+
+        searchInput.addEventListener('input', (e) => renderBooks(e.target.value));
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeReadingRoom(); });
+
+        function createDustParticles() {
+            const numParticles = window.innerWidth < 768 ? 20 : 40;
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < numParticles; i++) {
+                const dust = document.createElement('div');
+                dust.className = 'dust-mote';
+                const size = Math.random() * 3 + 1;
+                dust.style.width = `${size}px`; dust.style.height = `${size}px`;
+                dust.style.left = `${Math.random() * 100}vw`;
+                dust.style.animationDuration = `${Math.random() * 20 + 15}s`;
+                dust.style.animationDelay = `${Math.random() * 15}s`;
+                fragment.appendChild(dust);
+            }
+            document.body.appendChild(fragment);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderBooks();
+            renderScrolls();
+            createDustParticles();
+            // Default to English is already handled by initial HTML/CSS setup.
+        });
+    </script>
+</body>
+</html>
